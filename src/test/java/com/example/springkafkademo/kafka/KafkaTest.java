@@ -37,6 +37,7 @@ public class KafkaTest {
         broker.consumeFromAnEmbeddedTopic(consumer, TEST_TOPIC);
         ConsumerRecords<String, String> replies = KafkaTestUtils.getRecords(consumer);
         consumer.close();
+        broker.destroy();
 
         assertThat(replies.count()).isEqualTo(100);
     }
