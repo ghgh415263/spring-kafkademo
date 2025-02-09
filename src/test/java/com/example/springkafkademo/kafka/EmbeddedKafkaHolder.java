@@ -19,6 +19,7 @@ public final class EmbeddedKafkaHolder {
             }
             started = true;
         }
+        embeddedKafka.addTopics("dev_topic");
         return embeddedKafka;
     }
 
