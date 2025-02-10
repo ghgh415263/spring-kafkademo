@@ -19,7 +19,6 @@ import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.listener.KafkaListenerErrorHandler;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,8 +29,8 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 @Slf4j
-@SpringJUnitConfig(EmbeddedKafkaIntegrationTest2.Config.class)
-public class EmbeddedKafkaIntegrationTest2 {
+@SpringJUnitConfig(EmbeddedKafkaConsumerIntegrationTest.Config.class)
+public class EmbeddedKafkaConsumerIntegrationTest {
 
     private static final EmbeddedKafkaBroker kafkaBroker = EmbeddedKafkaHolder.getEmbeddedKafka();
 
@@ -44,7 +43,7 @@ public class EmbeddedKafkaIntegrationTest2 {
     @Captor
     ArgumentCaptor<String> messageCaptor;
 
-    @EnableKafka
+    @EnableKafka  // @KafkaListener와 관련된 코드들이 동작하게 만들어줌
     @Configuration
     static class Config {
 
@@ -107,10 +106,10 @@ public class EmbeddedKafkaIntegrationTest2 {
 
     @Test
     void kafkaTemplate로_embeddedKafka에_데이터보내기() throws ExecutionException, InterruptedException {
-        ListenableFuture future = kafkaTemplate.send("dev_topic", "asd");
-        future.get();
+        kafkaTemplate.send("dev_topic", "asd");
 
-        verify(consumerListener, timeout(5000).times(1))
+        //호출됬는지 안됬는지 검증
+        verify(consumerListener, timeout(2000).times(1))
                 .listener(messageCaptor.capture());
 
         assertEquals("asd", messageCaptor.getValue());
