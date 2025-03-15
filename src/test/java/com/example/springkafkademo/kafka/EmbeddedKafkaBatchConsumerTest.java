@@ -18,6 +18,7 @@ import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.listener.KafkaListenerErrorHandler;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.HashMap;
@@ -25,13 +26,16 @@ import java.util.Map;
 
 @Slf4j
 @SpringJUnitConfig(EmbeddedKafkaBatchConsumerTest.Config.class)
+@EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
 public class EmbeddedKafkaBatchConsumerTest {
 
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
-    private static final EmbeddedKafkaBroker kafkaBroker = EmbeddedKafkaHolder.getEmbeddedKafka();
-    @EnableKafka
+    @Autowired
+    private EmbeddedKafkaBroker kafkaBroker;
+
+    @EnableKafka //  Spring에서 Kafka 리스너를 활성화하는 어노테이션
     @Configuration
     static class Config {
 
@@ -43,7 +47,7 @@ public class EmbeddedKafkaBatchConsumerTest {
         @Bean
         public Map<String, Object> producerConfigs() {
             Map<String, Object> props = new HashMap<>();
-            props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBroker.getBrokersAsString());
+            props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
             props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
             props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
             return props;
@@ -57,7 +61,7 @@ public class EmbeddedKafkaBatchConsumerTest {
         @Bean
         public ConsumerFactory<String, String> consumerFactory() {
             Map<String, Object> props = new HashMap<>();
-            props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBroker.getBrokersAsString());
+            props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
             props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
             props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
             props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

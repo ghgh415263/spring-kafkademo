@@ -17,12 +17,11 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.listener.KafkaListenerErrorHandler;
-import org.springframework.kafka.test.EmbeddedKafkaBroker;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.timeout;
@@ -30,9 +29,8 @@ import static org.mockito.Mockito.verify;
 
 @Slf4j
 @SpringJUnitConfig(EmbeddedKafkaConsumerIntegrationTest.Config.class)
+@EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092"})
 public class EmbeddedKafkaConsumerIntegrationTest {
-
-    private static final EmbeddedKafkaBroker kafkaBroker = EmbeddedKafkaHolder.getEmbeddedKafka();
 
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -55,7 +53,7 @@ public class EmbeddedKafkaConsumerIntegrationTest {
         @Bean
         public Map<String, Object> producerConfigs() {
             Map<String, Object> props = new HashMap<>();
-            props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBroker.getBrokersAsString());
+            props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
             props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
             props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
             return props;
@@ -69,7 +67,7 @@ public class EmbeddedKafkaConsumerIntegrationTest {
         @Bean
         public ConsumerFactory<String, String> consumerFactory() {
             Map<String, Object> props = new HashMap<>();
-            props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBroker.getBrokersAsString());
+            props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
             props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
             props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
             props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -105,14 +103,14 @@ public class EmbeddedKafkaConsumerIntegrationTest {
     }
 
     @Test
-    void kafkaTemplate로_embeddedKafka에_데이터보내기() throws ExecutionException, InterruptedException {
-        kafkaTemplate.send("dev_topic", "asd");
+    void kafkaTemplate로_embeddedKafka에_데이터보내기() {
+        kafkaTemplate.send("dev_topic", "test");
 
         //호출됬는지 안됬는지 검증
         verify(consumerListener, timeout(2000).times(1))
                 .listener(messageCaptor.capture());
 
-        assertEquals("asd", messageCaptor.getValue());
+        assertEquals("test", messageCaptor.getValue());
     }
 
 }
