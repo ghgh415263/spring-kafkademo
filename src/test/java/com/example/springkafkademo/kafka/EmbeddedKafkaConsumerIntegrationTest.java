@@ -10,6 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -17,7 +18,9 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.listener.KafkaListenerErrorHandler;
+import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.HashMap;
@@ -30,6 +33,7 @@ import static org.mockito.Mockito.verify;
 @Slf4j
 @SpringJUnitConfig(EmbeddedKafkaConsumerIntegrationTest.Config.class)
 @EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092"})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class EmbeddedKafkaConsumerIntegrationTest {
 
     @Autowired
@@ -104,7 +108,7 @@ public class EmbeddedKafkaConsumerIntegrationTest {
 
     @Test
     void kafkaTemplate로_embeddedKafka에_데이터보내기() {
-        kafkaTemplate.send("dev_topic", "test");
+        kafkaTemplate.send("dev_topic", "test"); // 토픽을 안만들어도 보내면 자동으로 토픽을 만든다. auto.create.topics.enable=true인 kafka면
 
         //호출됬는지 안됬는지 검증
         verify(consumerListener, timeout(2000).times(1))
