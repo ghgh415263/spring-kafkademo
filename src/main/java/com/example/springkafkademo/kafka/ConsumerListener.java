@@ -23,4 +23,19 @@ public class ConsumerListener {
         // ack.mode=MANUAL 해도 배치 단위 커밋 (현재 poll()로 가져온 모든 메시지의 마지막 오프셋만 커밋됨)
     }
 
+    /*
+    RECORD: 리스너가 레코드 처리를 마친 후 오프셋을 커밋합니다.
+
+    BATCH: poll()에 의해 반환된 모든 레코드를 처리한 후 오프셋을 커밋합니다.
+
+    TIME: poll()에 의해 반환된 모든 레코드를 처리한 후, 마지막 커밋 이후 ackTime이 초과되면 오프셋을 커밋합니다.
+
+    COUNT: poll()에 의해 반환된 모든 레코드를 처리한 후, 마지막 커밋 이후 ackCount만큼 레코드가 수신되면 오프셋을 커밋합니다.
+
+    COUNT_TIME: TIME과 COUNT와 유사하지만, 조건 중 하나라도 충족되면 커밋이 수행됩니다.
+
+    MANUAL: 메시지 리스너가 acknowledge()를 호출하여 오프셋을 커밋합니다. 그 후 BATCH와 동일한 동작이 적용됩니다.
+
+    MANUAL_IMMEDIATE: 리스너가 Acknowledgment.acknowledge() 메서드를 호출하면 즉시 오프셋을 커밋합니다. */
+
 }
